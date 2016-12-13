@@ -1,0 +1,79 @@
+<project name="properties" default="build">
+
+  <!-- Define the repo root as a property, and resolve to an absolute file path. -->
+  <!-- We assume that Phing is running in vendor/acquia/blt/phing of a parent project. -->
+  <property name="repo.root.relative" value="${phing.dir}/../../../.." logoutput="false"/>
+  <resolvepath propertyName="repo.root" file="${repo.root.relative}"/>
+
+  <property name="blt.root.relative" value="${phing.dir}/.." logoutput="false"/>
+  <resolvepath propertyName="blt.root" file="${blt.root.relative}"/>
+
+  <!-- Load file directory and binary locations. -->
+  <property file="${phing.dir}/build.yml" override="true" logoutput="false"/>
+
+  <!-- Load the root project.yml file for this project. -->
+  <property file="${blt.config-files.project}" override="true" logoutput="false"/>
+
+  <!-- Load the local project.local.yml file for this project. -->
+  <!--@todo Change this so that it is only loaded for local:* targets. -->
+  <if>
+    <available file="${blt.config-files.local}" type="file" property="local.properties"/>
+    <then>
+      <property file="${blt.config-files.local}" override="true" logoutput="${blt.verbose}"/>
+    </then>
+  </if>
+
+  <!--Get version information. -->
+  <if>
+    <not><available file="${blt.config-files.schema-version}"/></not>
+    <then>
+      <!-- If no schema version exists, assume 8.5.2, which is last release before this file was introduced. -->
+      <exec dir="${repo.root}" command="mkdir -p blt" checkreturn="true" logoutput="true" passthru="false" level="${blt.exec_level}"/>
+      <exec dir="${repo.root}" command="echo '8.5.2' >> ${blt.config-files.schema-version}" checkreturn="true" logoutput="true" passthru="false" level="${blt.exec_level}"/>
+    </then>
+  </if>
+  <exec dir="${repo.root}" command="cat ${blt.config-files.schema-version}" outputProperty="blt.schema-version" checkreturn="true" logoutput="false" level="${blt.exec_level}"/>
+  <!-- Send errors to /dev/null, for environments like ACE without composer. -->
+  <exec dir="${repo.root}" command="composer info acquia/blt --no-ansi 2> /dev/null | grep versions | awk '{print $4}'" outputProperty="blt.version" logoutput="false" checkreturn="true" level="${blt.exec_level}" />
+
+  <!-- Set the ${verbosity} variable.  -->
+  <verbosityTask returnProperty="verbosity"/>
+  <if>
+    <or>
+      <equals arg1="${verbosity}" arg2="debug"/>
+      <equals arg1="${verbosity}" arg2="verbose"/>
+    </or>
+    <then>
+      <!-- blt.verbose is used to toggle the verbosity on other tasks, such as Drush and Behat. -->
+      <property name="blt.verbose" value="true"/>
+    </then>
+  </if>
+
+  <echo level="verbose">Executing commands against multisite "${multisite.name}"</echo>
+
+  <!-- Default drush alias. -->
+  <property name="drush.alias" value="${drush.default_alias}" override="false" logoutput="false"/>
+  <if>
+    <equals arg1="${env.USER}" arg2="vagrant"/>
+    <then>
+      <echo level="verbose">You are running commands inside of a vagrant machine. Setting drush alias to @self.</echo>
+      <property name="drush.alias" value="self" override="true"/>
+    </then>
+  </if>
+
+  <target name="echo-property" description="Echoes the value of a Phing property." hidden="true">
+    <fail unless="property.name" message="property.name must be set!"/>
+    <echo>${property.name}</echo>
+    <if>
+      <isset property="${property.name}"/>
+      <then>
+        <echo level="warning">${${property.name}}</echo>
+      </then>
+    </if>
+  </target>
+
+  <target name="echo-properties" description="Echoes the value of all Phing properties." hidden="true">
+    <echoproperties/>
+  </target>
+
+</project>
