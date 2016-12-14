@@ -359,3 +359,11 @@
 #    'uri' => 'http://example.com',
 #    'root' => $aliases['dev']['root'],
 #  ) + $aliases['server'];
+
+$aliases['remote'] = array(
+  'uri' => 'remote.blt.centos7.ash',
+  'root' => '/var/www/remote.blt/docroot',
+  'path-aliases' => array(
+    '%dump-dir' => '/tmp',
+  ),
+);

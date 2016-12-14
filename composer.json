@@ -18,7 +18,8 @@
         "drupal/security_review": "8.*",
         "drupal/shield": "^8.1.0",
         "drupal-composer/drupal-security-advisories": "8.0.x-dev",
-        "drush/drush": "^9.0"
+        "drush/drush": "^9.0",
+        "drupal/config_installer": "^8.1"
     },
     "require-dev": {
         "behat/behat": "^3.1",
