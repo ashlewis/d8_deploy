@@ -1,5 +1,5 @@
 # ignore devel config
 # NOTE: will need to work out a better way to share with other devs e.g. drush_cmi_tools or config_split
-devel.settings.yml
-shortcut.set.default.yml
-system.menu.devel.yml
+default/devel.settings.yml
+default/shortcut.set.default.yml
+default/system.menu.devel.yml
